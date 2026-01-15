@@ -6,9 +6,11 @@
 #SBATCH --mem=64G
 #sbatch -x n153,n154
 
+set -euo pipefail
+
 if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <input_base_dir> <output_base_dir>"
-    exit 1
+  echo "Usage: sbatch $0 <input_base_dir> <output_base_dir>"
+  exit 1
 fi
 
 # Input directory: contains multiple folders like A1BG, AAABBB, etc.
