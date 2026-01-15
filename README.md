@@ -4,9 +4,6 @@ This repository is to build phylogentic trees from orthologous promoters previou
 
 **Installs**: MAFFT, PRANK, trimAl, RAxML (raxmlHPC-PTHREADS).
 ```
-MAFFT: sudo apt
-```
-```
 PRANK:
 conda create -n prank -c conda-forge -c bioconda prank mafft -y
 conda activate prank
