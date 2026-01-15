@@ -42,3 +42,40 @@ you'll need to combine them into one single fasta per gene including all species
 ```
 sbatch combine_species_per_Gene.slurm path/to/input/ path/to/output/
 ```
+
+---
+
+***1. Multiple alignment***
+
+run **PRANK**: 
+
+checking if not a lot of species are missing in the tree
+```
+# NOT NECESSARY - get a list of species that are missing in the Tree (so we can remove them from the sequences)
+# for all on the cluster:
+sbatch get_missing_species_inTree_all.slurm # output is in MotifTSSvalidation/missing_counts.tsv -- maximum number of speacies missing in the tree is 6 NoBigDeal
+
+# NOT NECESSARY - remove the headers with the missing species (on a test subset) -- no need to do this since we will use -pruntree -prundata in prank
+awk 'NR==FNR {drop[$1]=1; next}
+     /^>/ {name=substr($0,2); keep=!(name in drop)}
+     {if(keep) print}' AACS_missing.txt AACS_combined_renamed.fa > AACS_combined_nomissing.fa
+```
+
+Now the actual run:
+```
+#(takes ~5-10 minutes per region)
+# for one .fa - command line cluster
+prank -d=RERconvergeApplesToApples/promoter-500bp-sequences-combinedspeciesFIXEDRenamed/AACS_combined_renamed.fa -t=447-mammalian-2022v1.nh -o=PRANK_results/AACS -F -once -prunetree -prunedata
+
+# for multiple .fa - slurm array job cluster
+# remember to rename first by "sbatch promoterseqs_rename.slurm"
+
+conda activate prank
+
+# 1. put all the file names/directory into one txt file
+find RERconvergeApplesToApples/promoter-500bp-sequences-combinedspeciesFIXEDRenamed \
+     -maxdepth 1 -type f -name '*_combined_renamed.fa' \
+     | sort > promoter_files_all.txt
+# 2. run them in batches of 100 files in 188 array jobs (should take ~16 hours)
+sbatch run_prank_array_test.slurm promoter_files_all.txt 447-mammalian-2022v1.nh PRANK_results_all "-F -once -prunetree -prunedata"
+```
