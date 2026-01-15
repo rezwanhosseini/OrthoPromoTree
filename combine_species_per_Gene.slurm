@@ -1,10 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job mchikina
+#SBATCH --job OrthoPromoTree
 #SBATCH -p dept_cpu
 #SBATCH -c 64
 #SBATCH --mem=64G
-#sbatch -x n153,n154
+#SBATCH --output=logs/combine_%j.out
+
+mkdir -p logs
+
 
 set -euo pipefail
 
