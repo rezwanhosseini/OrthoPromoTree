@@ -39,7 +39,14 @@ you'll need to combine them into one single fasta per gene including all species
 ```
 sbatch combine_species_per_Gene.slurm path/to/input/ path/to/output/
 ```
-
+you might need to rename the species name in your fasta files (in our case from VGP) to match the tree (in our case from Zoonomia) used for the alignment by PRANK in the later steps.
+```
+bash rename_species_vgp2zoonomia.sh \
+  /path/to/combined_fastas \
+  /path/to/renamed_fastas \
+  VGP_Species_withZoonomiaNames.txt
+```
+  
 ---
 
 ***1. Multiple alignment***
