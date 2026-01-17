@@ -65,18 +65,12 @@ awk 'NR==FNR {drop[$1]=1; next}
 Now the actual run:
 ```
 #(takes ~5-10 minutes per region)
-# for one .fa - command line cluster
-prank -d=RERconvergeApplesToApples/promoter-500bp-sequences-combinedspeciesFIXEDRenamed/AACS_combined_renamed.fa -t=447-mammalian-2022v1.nh -o=PRANK_results/AACS -F -once -prunetree -prunedata
-
-# for multiple .fa - slurm array job cluster
-# remember to rename first by "sbatch promoterseqs_rename.slurm"
 
 conda activate prank
 
 # 1. put all the file names/directory into one txt file
-find RERconvergeApplesToApples/promoter-500bp-sequences-combinedspeciesFIXEDRenamed \
-     -maxdepth 1 -type f -name '*_combined_renamed.fa' \
-     | sort > promoter_files_all.txt
+find promoterSeqs_byGene_renamed/      -maxdepth 1 -type f -name '*_combined_renamed.fa'      | sort > promoter_files_all.txt
+
 # 2. run them in batches of 100 files in 188 array jobs (should take ~16 hours)
 sbatch run_prank_array_test.slurm promoter_files_all.txt 447-mammalian-2022v1.nh PRANK_results_all "-F -once -prunetree -prunedata"
 ```
