@@ -19,6 +19,8 @@ dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 map_df <- read.table(mapping_tsv, sep = "\t", header = T) #read.table(mapping_tsv, sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "", comment.char = "")
 map_df$VGP_name <- sapply(strsplit(map_df$Directory.Name, "__"), `[`, 3)
 
+map_df$Zoonomia_name <- paste0(toupper(substr(map_df$Zoonomia_name, 1, 1)),
+                               substr(map_df$Zoonomia_name, 2, nchar(map_df$Zoonomia_name)))
 
 vgp2zoo <- setNames(map_df$Zoonomia_name, map_df$VGP_name)
 
@@ -31,7 +33,8 @@ if (length(fa_files) == 0) stop("No FASTA files matched: ", file.path(fasta_dir,
 
 for (infa in fa_files) {
   base <- basename(infa)
-  outfa <- file.path(output_dir, base)
+  out_base <- sub("_combined_names\\.fa$", "_combined_renamed.fa", base)
+  outfa <- file.path(output_dir, out_base)
 
   lines <- readLines(infa)
 
