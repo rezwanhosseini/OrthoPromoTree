@@ -72,5 +72,5 @@ conda activate prank
 find promoterSeqs_byGene_renamed/      -maxdepth 1 -type f -name '*_combined_renamed.fa'      | sort > promoter_files_all.txt
 
 # 2. run them in batches of 100 files in 188 array jobs (should take ~16 hours)
-sbatch run_prank_array_test.slurm promoter_files_all.txt 447-mammalian-2022v1.nh PRANK_results_all "-F -once -prunetree -prunedata"
+sbatch run_prank_array_all.slurm promoter_files_all.txt 447-mammalian-2022v1.nh PRANK_results_all "-F -once -prunetree -prunedata"
 ```
