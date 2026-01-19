@@ -119,7 +119,7 @@ conda activate treestuff-env
 
 # for all aligned promoters before triming:
 nw_labels -I 447-mammalian-2022v1.nh | sort -u > taxa_files/tree.taxa
-sbatch run_RAxML_all.slurm # note the INDIR=PRANK_results_all, OUTDIR=prank_untrimmed_RAxML, manifest=PRANK_best_fas_files.txt, and raxmlHPC-PTHREADS <other args> -n "{gene}_untrim, change RESULT and LOGFILE accordingly -- will make outputs in prank_untrimmed_RAxML/*raxml.tree
+sbatch run_RAxML_all.slurm # note the INDIR=PRANK_results_all, OUTDIR=prank_untrimmed_RAxML, manifest=prank_best_fas_files.txt, and raxmlHPC-PTHREADS <other args> -n "{gene}_untrim, change RESULT and LOGFILE accordingly -- will make outputs in prank_untrimmed_RAxML/*raxml.tree
 
 # this will create 11790 trees. some regions do not have enough species for the tree to build
 
