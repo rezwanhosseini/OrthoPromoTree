@@ -7,6 +7,8 @@ This repository is to build phylogentic trees from orthologous promoters previou
 PRANK:
 conda create -n prank -c conda-forge -c bioconda prank mafft -y
 conda activate prank
+conda install -c conda-forge parallel
+
 ```
 ```
 trimAL:
