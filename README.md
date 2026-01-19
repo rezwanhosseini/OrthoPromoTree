@@ -76,3 +76,56 @@ find promoterSeqs_byGene_renamed/      -maxdepth 1 -type f -name '*_combined_ren
 # 2. run them in batches of 100 files in 188 array jobs (should take ~16 hours)
 sbatch run_prank_array_all.slurm promoter_files_all.txt 447-mammalian-2022v1.nh PRANK_results_all "-F -once -prunetree -prunedata"
 ```
+
+***2. Trimming the gaps and unused sequences***
+
+```
+# for one .best.fa:
+trimal -in AACS.best.fas -out AACS.best.trim.fas -gappyout
+
+# for multiple - while keep tracking of the fractions selected and deleted
+bash run_trimAl_test.sh <PRANK_results_test> <trimAl_results_test>
+
+# for multiple on the cluster - (conda activate trimal)
+# make a list of the files first:
+find "$INDIR" -maxdepth 1 -type f -name <'*pattern'> | sort > <output.txt> # MAFFT_best_fa_files.txt
+
+# then run the following to trim the files in batches of 200 by 94 array jobs
+sbatch run_trimAl_all.slurm # this will save the trimmed alignments in trimAl_results_all/*.best.trim.fas
+
+# counting the number of species in each region before and after trimming:
+./count_headers.sh PRANK_results_test best.fas # before
+./count_headers.sh trimAl_results_test best.trim.fas # after
+# now get the difference between before and after
+
+```
+
+***3. build the tree***
+```
+conda activate treestuff-env
+# for one region:
+
+# 1. first prune the tree (to remove the species that we don't have sequences for)
+awk '/^>/{sub(/^>/,""); print $1}' PRANK_results_test/AACS.best.fas | sort -u > fasta.taxa # get the fasta species
+nw_labels -I 447-mammalian-2022v1.nh | sort -u > tree.taxa # get the tree species
+comm -23 tree.taxa fasta.taxa > to_remove.taxa # get the species to remove
+pxrmt -t 447-mammalian-2022v1.nh -f to_remove.taxa > 447-mammalian-2022v1.pruned.nh # prune the tree
+
+# 2. build the tree based on the alignment for the region
+raxmlHPC-PTHREADS -T 8 -s PRANK_results_test/AACS.best.fas   -m GTRGAMMA -t 447-mammalian-2022v1.pruned.nh -f e -p 1   -n AACS_untrim 
+
+
+# for all regions:
+find PRANK_results_all/ -maxdepth 1 -type f -name '*.best.fas' | sort > PRANK_best_fas_files.txt
+nw_labels -I 447-mammalian-2022v1.nh | sort -u > taxa_files/tree.taxa
+sbatch run_RAxML_all.slurm # note the INDIR=PRANK_results_all, OUTDIR=prank_untrimmed_RAxML, manifest=PRANK_best_fas_files.txt, and raxmlHPC-PTHREADS <other args> -n "{gene}_untrim, change RESULT and LOGFILE accordingly -- will make outputs in prank_untrimmed_RAxML/*raxml.tree
+
+# this will create 11790 trees. some regions do not have enough species for the tree to build
+
+find trimAl_results_all/ -maxdepth 1 -type f -name '*.best.trim.fas' | sort > trimAl_best_trim_fas_files.txt
+### TODO: after trimming some sites from some species will be all NNNNN --> need to remove them or handle them somehow
+code to handle it: ---
+sbatch run_RAxML_all.slurm # note the INDIR=trimAl_results_all, OUTDIR=prank_trimmed_RAxML, and manifest=trimAl_best_trim_fas_files.txt, and raxmlHPC-PTHREADS <other args> -n "{gene}_trim, change RESULT and LOGFILE accordingly -- will make outputs in prank_trimmed_RAxML/*raxml.tree
+
+
+```
